@@ -55,4 +55,15 @@ async function hoursStatus(date) {
     return res
 }
 
-module.exports = { validate, findATable, hoursStatus }
+async function apply(body) {
+    body.table = await findATable(body)
+    const validPayload = validate(body)
+    if (validPayload.error) {
+        return validPayload || {error: 'Unknow error'}
+    }
+
+    let res = await db.create('booking', body)
+    return res
+}
+
+module.exports = { validate, findATable, hoursStatus, apply }

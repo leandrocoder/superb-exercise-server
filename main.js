@@ -1,4 +1,5 @@
+const settings = require('./src/settings')
 const app = require('./src/app.js')
-app.listen(3000, () => {
-    console.log('Server running @ http://localhost:3000')
+app.listen(settings.env.HTTP_PORT, () => {
+    console.log(`Server running @ http://localhost:${settings.env.HTTP_PORT}`)
 })

@@ -1,11 +1,14 @@
 const Koa = require('koa')
 const cors = require('@koa/cors');
 const Router = require('koa-router')
-const queue = require('./queue')
+const Queue = require('./queue')
 
 const settings = require('./settings')
 const db = require('./database')
 const booking = require('./booking')
+const queue = new Queue();
+
+const pack = require('../package.json')
 
 db.mongoose.connection.on("connected", async () => {
     settings.loadFromDatabase()
@@ -14,10 +17,15 @@ db.mongoose.connection.on("connected", async () => {
 const app = new Koa()
 const router = new Router()
 
+queue.on('json', json => {
+    if (json.type == "booking" && json.data) {
+        booking.apply(json.data)
+    }
+})
+
 // Return the current version of API
 router.get('/', ctx => {
-    queue.add('test')
-    ctx.body = 'Hello World'
+    ctx.body = {version:pack.version}
 })
 
 // Return the array of tables
@@ -48,18 +56,19 @@ router.del('/booking/:id', async ctx => {
 })
 
 // Add a book request to the queue
-router.post('/booking', async ctx => {
-    const body = ctx.request.body
-    body.table = await booking.findATable(body)
-    const validPayload = booking.validate(body)
-    if (validPayload.error) {
-        ctx.status = 400
-        ctx.body = validPayload || {error: 'Unknow error'}
-        return
-    }
+router.post('/queue', async ctx => {
 
-    let res = await db.create('booking', body)
-    ctx.body = res
+    ctx.body = { status:true, message:'Booking added to queue' }
+    const queueMessage = {
+        type: "booking",
+        data: ctx.request.body
+    }
+    queue.add(queueMessage)
+})
+
+// Create booking
+router.post('/booking', async ctx => {
+    ctx.body = booking.apply(ctx.request.body)
 })
 
 // Add a book request to the queue
