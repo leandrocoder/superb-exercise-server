@@ -1,0 +1,33 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "System to manage bookings.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leandrocoder/superb-exercise-server.git"
+  },
+  "author": "Leandro Carlos Rocha Silva",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leandrocoder/superb-exercise-server/issues"
+  },
+  "homepage": "https://github.com/leandrocoder/superb-exercise-server#readme",
+  "dependencies": {
+    "@koa/cors": "^3.1.0",
+    "koa": "^2.13.4",
+    "koa-body": "^4.2.0",
+    "koa-cors": "0.0.16",
+    "koa-router": "^10.1.1",
+    "nodemon": "^2.0.14"
+  },
+  "devDependencies": {
+    "jest": "^27.3.1",
+    "supertest": "^6.1.6"
+  }
+}
