@@ -1,8 +1,9 @@
+require('./env')
+
 const dotenv = require('dotenv')
 const fs = require('fs')
 const env = dotenv.parse(fs.readFileSync('.env'))
 
-var db = null
 var docID = null
 
 var data =  {
@@ -14,7 +15,6 @@ var data =  {
 async function save(payload) {
     // todo: save in database
     data = payload
-    if (db == null) await loadFromDatabase()
     db.put('settings', docID, data)
 }
 
@@ -23,9 +23,8 @@ function get(prop = null) {
     return data[prop]
 }
 
-async function loadFromDatabase()
+async function loadFromDatabase(db)
 {
-    if (db == null) db = require('./database')
     let res = await db.getFirst('settings')
     if (res == null) {
         res = await db.create('settings', data)

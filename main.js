@@ -1,4 +1,4 @@
 const app = require('./src/app.js')
-app.listen(3000, () => {
-    console.log('Server running @ http://localhost:3000')
+app.listen(process.env.HTTP_PORT, () => {
+    console.log(`Server running @ http://localhost:${process.env.HTTP_PORT}`)
 })

@@ -1,12 +1,13 @@
+require('../env')
+
 const mongoose = require('mongoose')
 const normalize = require('normalize-mongoose')
-const settings = require('../settings')
 
 const DBCONFIG = {
-    HOST: settings.env.MONGO_HOST,
-    USER: settings.env.MONGO_USER,
-    PASSWORD: settings.env.MONGO_PASSWORD,
-    DATABASE: settings.env.MONGO_DB,
+    HOST: process.env.MONGO_HOST,
+    USER: process.env.MONGO_USER,
+    PASSWORD: process.env.MONGO_PASSWORD,
+    DATABASE: process.env.MONGO_DB,
 }
 
 const END_POINT = `mongodb+srv://${DBCONFIG.USER}:${DBCONFIG.PASSWORD}@${DBCONFIG.HOST}/${DBCONFIG.DATABASE}?retryWrites=true&w=majority`
@@ -60,7 +61,11 @@ async function get(table, id) {
 async function del(table, id) {
     let model = models[table]
     if (!model) return
-    return await model.deleteOne({_id:id})
+    let res = await model.deleteOne({_id:id})
+    if (res.n > 0) {
+        return { status: true }
+    }
+    return { status: false }
 }
 
 async function put(table, id, data) {
