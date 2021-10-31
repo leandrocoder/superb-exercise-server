@@ -5,15 +5,16 @@ const events = require('events')
 const AWS = require('aws-sdk');
 // Set the region we will be using
 AWS.config.update({
-  region: settings.env.AWS_REGION ,
-  secretAccessKey: settings.env.AWS_SECRET_ACCESS_KEY,
-  accessKeyId: settings.env.AWS_ACCESS_KEY_ID 
+  region: process.env.AWS_REGION ,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID 
 });
 
 
 class Queue extends events {
 
 	sqs = null
+	needDispose = false
 
 	constructor() {
 		super()
@@ -24,7 +25,7 @@ class Queue extends events {
 	add(payload) {
 		const params = {
 			MessageBody: JSON.stringify(payload),
-			QueueUrl: settings.env.AWS_QUEUE_URL
+			QueueUrl: process.env.AWS_QUEUE_URL
 		}
 		this.sqs.sendMessage(params, (err, data) => {
 			if (err) {
@@ -35,17 +36,22 @@ class Queue extends events {
 		})
 	}
 
+	dispose() {
+		this.needDispose = true
+	}
+
 
 	processMessages() {
-	
+		this.needDispose = false
 		const receiveConfig = {
-			QueueUrl: settings.env.AWS_QUEUE_URL,
-			MaxNumberOfMessages: settings.env.AWS_QUEUE_MAX_MESSAGES,
-			VisibilityTimeout: settings.env.AWS_QUEUE_VISIBILITY_TIMEOUT,
-			WaitTimeSeconds: settings.env.AWS_QUEUE_WAITING_SECONDS
+			QueueUrl: process.env.AWS_QUEUE_URL,
+			MaxNumberOfMessages: process.env.AWS_QUEUE_MAX_MESSAGES,
+			VisibilityTimeout: process.env.AWS_QUEUE_VISIBILITY_TIMEOUT,
+			WaitTimeSeconds: process.env.AWS_QUEUE_WAITING_SECONDS
 		}
 	
 		this.sqs.receiveMessage(receiveConfig, (err, data) => {
+			if (!this.needDispose) return
 			this.processMessages()
 			if (err) {
 				console.log(err, err.stack);
@@ -59,7 +65,7 @@ class Queue extends events {
 					try { json = JSON.parse(raw) } catch {}
 					
 					const deleteConfig = {
-						QueueUrl: settings.env.AWS_QUEUE_URL,
+						QueueUrl: process.env.AWS_QUEUE_URL,
 						ReceiptHandle: data.Messages[i].ReceiptHandle
 					}
 					
@@ -79,4 +85,4 @@ class Queue extends events {
 	}
 }
 
-module.exports = Queue
+module.exports = new Queue()

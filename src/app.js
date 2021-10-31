@@ -1,31 +1,31 @@
+require('./env')
+
 const Koa = require('koa')
 const cors = require('@koa/cors');
 const Router = require('koa-router')
-const Queue = require('./queue')
-
-const settings = require('./settings')
-const db = require('./database')
-const booking = require('./booking')
-const queue = new Queue();
 
 const pack = require('../package.json')
+const settings = require('./settings')
+const booking = require('./booking')
 
+const db = require('./database')
 db.mongoose.connection.on("connected", async () => {
-    settings.loadFromDatabase()
+    //await settings.loadFromDatabase(db)
 });
 
-const app = new Koa()
-const router = new Router()
-
+const queue = require('./queue')
 queue.on('json', json => {
     if (json.type == "booking" && json.data) {
         booking.apply(json.data)
     }
 })
 
+const app = new Koa()
+const router = new Router()
+
 // Return the current version of API
 router.get('/', ctx => {
-    ctx.body = {version:pack.version}
+    ctx.body = {version:pack.version }
 })
 
 // Return the array of tables
@@ -51,8 +51,7 @@ router.get('/booking', async ctx => {
 
 // Return the array of tables
 router.del('/booking/:id', async ctx => {
-    const id = ctx.params.id
-    ctx.body = await db.del('booking', id)
+    ctx.body = booking.del(ctx.params.id)
 })
 
 // Add a book request to the queue
@@ -69,12 +68,6 @@ router.post('/queue', async ctx => {
 // Create booking
 router.post('/booking', async ctx => {
     ctx.body = booking.apply(ctx.request.body)
-})
-
-// Add a book request to the queue
-router.post('/booking/test', async ctx => {
-    let table = await booking.findATable(ctx.request.body)
-    ctx.body = table
 })
 
 router.get('/settings', ctx => {
