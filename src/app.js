@@ -28,6 +28,50 @@ router.get('/', ctx => {
     ctx.body = {version:pack.version }
 })
 
+
+// Return the settings
+router.get('/settings', ctx => {
+    ctx.body = settings.get()
+})
+
+// Update the settings
+router.put('/settings', ctx => {
+    settings.save(ctx.request.body)
+    ctx.body = settings.get()
+})
+
+// Return the list of bookings
+router.get('/booking', async ctx => {
+    let list = await db.list('booking')
+    ctx.body = list
+})
+
+// Create booking
+router.post('/booking', async ctx => {
+    let res = await booking.apply(ctx.request.body)
+    ctx.body = res
+})
+
+// Delete a booking
+router.del('/booking/:id', async ctx => {
+    ctx.body = await booking.del(ctx.params.id)
+})
+
+// Add a book request to the queue
+router.post('/queue', async ctx => {
+
+    ctx.body = { status:true }
+    const queueMessage = {
+        type: "booking",
+        data: ctx.request.body
+    }
+    queue.add(queueMessage)
+})
+
+router.get('/hours/:date', async ctx => {
+    ctx.body = await booking.hoursStatus(ctx.params.date)
+})
+
 // Return the array of tables
 router.get('/table', async ctx => {
     ctx.body = await db.list('table')
@@ -44,51 +88,13 @@ router.del('/table/:id', async ctx => {
     ctx.body = await db.del('table', id)
 })
 
-router.get('/booking', async ctx => {
-    let list = await db.list('booking')
-    ctx.body = list
-})
-
-// Return the array of tables
-router.del('/booking/:id', async ctx => {
-    ctx.body = booking.del(ctx.params.id)
-})
-
-// Add a book request to the queue
-router.post('/queue', async ctx => {
-
-    ctx.body = { status:true, message:'Booking added to queue' }
-    const queueMessage = {
-        type: "booking",
-        data: ctx.request.body
-    }
-    queue.add(queueMessage)
-})
-
-// Create booking
-router.post('/booking', async ctx => {
-    let res = await booking.apply(ctx.request.body)
-    ctx.body = res
-})
-
-router.get('/settings', ctx => {
-    ctx.body = settings.get()
-})
-
-router.post('/settings', ctx => {
-    settings.save(ctx.request.body)
-    ctx.body = settings.get()
-})
-
-router.get('/hours/:date', async ctx => {
-    ctx.body = await booking.hoursStatus(ctx.params.date)
-})
-
 router.del('/drop/:table', async ctx => {
     try {
         await db.drop(ctx.params.table)
-    } catch {}
-    ctx.body = { status: true }
+        ctx.body = { status: true }
+    } catch {
+        ctx.body = { status: false }
+    }
 })
 
 app.use(cors());

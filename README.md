@@ -5,18 +5,20 @@
 This challenge has been designed to measure your knowledge of Node.js, Docker, and various
 technologies, like databases and testing.
 
-- [Objective](#)
-- [Living project](#)
-- [Frontend Repositories](#)
-- [Technologies](#)
-- [System Flow](#)
-- [REST API](#)
-- [Tests](#)
-- [Install](#)
+- [Objective](#objective)
+- [Living project](#living-project)
+- [Frontend Repositories](#frontend-repositories)
+- [Technologies](#technologies)
+- [System Flow](#system-flow)
+- [REST API](#rest-api)
+- [Tests](#tests)
+- [Install](#install)
 
 ## Objective
 
 The objective is to implement a system to able users to send booking requests to a server, that verify if the booking is possible and save it. To make it possible the project is split into 3 parts: This one with the backend server and the other two with the client site and a management system for the restaurant owner to manage the tables, bookings, and working days/hours.
+
+## Living project
 
 
 ## Frontend repositories
@@ -26,7 +28,7 @@ The objective is to implement a system to able users to send booking requests to
 
 ## Technologies
 
-For the backend server the frameworks used are: [Koa](https://www.npmjs.com/package/koa), [MongoDB](https://www.mongodb.com/) and [AWS](https://aws.amazon.com/) for the queue system and docker hosting.
+For the backend server the frameworks used are: [Koa](https://www.npmjs.com/package/koa), [MongoDB](https://www.mongodb.com/) and [AWS](https://aws.amazon.com/) SQS for the queue system and docker hosting.
 
 ## System Flow
 
@@ -35,6 +37,67 @@ The basic system flow sends booking requests to a queue service, this could be u
 <img src="doc/flow.png">
 
 ## REST API
+
+### Get Settings
+
+**Request**
+
+```GET /settings```
+
+**Response**
+```
+{
+    "openTime": "11:00",
+    "closeTime": "23:00",
+    "openDays": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false
+    ]
+}
+```
+
+### Update Settings
+
+**Request**
+
+```PUT /settings```
+```
+{
+    "openTime": "11:00",
+    "closeTime": "23:00",
+    "openDays": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false
+    ]
+}
+```
+
+**Response**
+```
+{
+    "openTime": "11:00",
+    "closeTime": "23:00",
+    "openDays": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false
+    ]
+}
+```
 
 ### List Bookings
 
@@ -94,7 +157,7 @@ The basic system flow sends booking requests to a queue service, this could be u
 
 **Request**
 
-```POST /queue/```
+```POST /queue```
 ```
 { 
     "name": "User name",
@@ -113,7 +176,7 @@ The basic system flow sends booking requests to a queue service, this could be u
 
 ### Hour Status
 
-Passing a date, the system return all available hours
+Passing a date, the system return all available hours considering if the restaurant is open in the date. The property "tables" indicate the number of available tables.
 
 **Request**
 
@@ -124,10 +187,67 @@ Passing a date, the system return all available hours
 [
     { "tables": 2, "time": "09:00" },
     { "tables": 1, "time": "10:00" },
-    { "tables": 1, "time": "13:00" },
+    { "tables": 0, "time": "13:00" },
     ...
 ]
 ```
+
+### List Tables
+
+**Request**
+
+```GET /table```
+
+**Response**
+
+```
+[
+    {
+        "chairs": 4,
+        "id": "61805359b47cc91ad8e1a1a3"
+    }
+    ...
+]
+```
+
+### Create a Table
+
+**Request**
+
+```POST /table```
+
+**Response**
+```
+{
+    "chairs": 4,
+    "id": "618064913316472790414d52"
+}
+```
+
+### Delete a Table
+
+**Request**
+
+```DELETE /table/{{BOOKING ID}}```
+
+
+**Response**
+
+``` { "status": true } ```
+
+### Drop a database Table
+
+Just for make tests easier.
+
+**Request**
+
+```DELETE /drop/{{TABLE NAME}}```
+
+
+**Response**
+
+``` { "status": true } ```
+
 
 ## Tests
 
@@ -148,4 +268,6 @@ The test running tool used to ensure all the endpoints in this project are runni
     - [x] Success requesting a booking with all correct data
     - [x] Delete booking
     - [x] Delete a table
+
+## Install
 
