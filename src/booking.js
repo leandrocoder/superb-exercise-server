@@ -13,10 +13,10 @@ function isDate(dateStr) {
     return !isNaN(new Date(dateStr).getDate());
 }
 
-function checkBiggerThanNow(dateStr) {
-    let now = Date.now()
+function checkDateIsLessThanNow(dateStr) {
+    let now = new Date((new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)).getTime()
     let d = new Date(dateStr).getTime()
-    return d > now
+    return d < now
 }
 
 function validate(data) {
@@ -29,7 +29,7 @@ function validate(data) {
     if (!checkValidHour(data.hour)) return { error: `Invalid hour format.`}
     if (!isDate(data.date)) return { error: `Invalid date format.` }
 
-    if (!checkBiggerThanNow(data.date)) return { error: `The date cannot be less than now`}
+    if (checkDateIsLessThanNow(data.date)) return { error: `The date cannot be less than now`}
 
     let min = hourToInt(settings.get('openTime'))
     let max = hourToInt(settings.get('closeTime'))
@@ -63,6 +63,10 @@ function hourToInt(hour) {
 async function hoursStatus(date) {
     let min = hourToInt(settings.get('openTime'))
     let max = hourToInt(settings.get('closeTime'))
+    let openDays = settings.get("openDays")
+
+    let d = new Date(date)
+    if (!openDays[d.getDay()]) return []
 
     let bookings = await db.list('booking', {date})   
     let tables = await db.list('table')
@@ -73,9 +77,11 @@ async function hoursStatus(date) {
     let res = []
     for (let i = 0; i < 24; i++) {
         if (i >= min && i < max) {
-            let t = ((i < 9) ? `0${i}` : i) + ':00'
+            let t = ((i <= 9) ? `0${i}` : i) + ':00'
             let bookedTables = bookings.filter(x => x.hour == t).map(x => x.table.toString())
             let tableList = tables.filter(x => bookedTables.indexOf(x) < 0)
+            d = new Date(`${date} ${t}`)
+            if (d.getTime() < Date.now()) tableList = []
             res.push({
                 tables: tableList.length,
                 time: t

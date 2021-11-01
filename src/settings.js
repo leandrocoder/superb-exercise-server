@@ -1,5 +1,7 @@
 require('./env')
 
+const db = require('./database')
+
 const dotenv = require('dotenv')
 const fs = require('fs')
 const env = dotenv.parse(fs.readFileSync('.env'))
@@ -13,7 +15,6 @@ var data =  {
 }
 
 async function save(payload) {
-    // todo: save in database
     data = payload
     db.put('settings', docID, data)
 }

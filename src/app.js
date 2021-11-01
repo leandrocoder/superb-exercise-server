@@ -10,7 +10,7 @@ const booking = require('./booking')
 
 const db = require('./database')
 db.mongoose.connection.on("connected", async () => {
-    //await settings.loadFromDatabase(db)
+    await settings.loadFromDatabase(db)
 });
 
 const queue = require('./queue')
@@ -67,7 +67,8 @@ router.post('/queue', async ctx => {
 
 // Create booking
 router.post('/booking', async ctx => {
-    ctx.body = booking.apply(ctx.request.body)
+    let res = await booking.apply(ctx.request.body)
+    ctx.body = res
 })
 
 router.get('/settings', ctx => {
