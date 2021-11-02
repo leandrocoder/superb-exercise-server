@@ -23,7 +23,7 @@ function validate(data) {
     if (!data.table) return { error: `Table not found.` }    
     const props = ['name', 'phone', 'chairs', 'date', 'hour']
     props.forEach(key => {
-        if (!data.hasOwnProperty(key) || data[key].toString().length == 0) return { error: `Property ${key} required.`}        
+        if (!data.hasOwnProperty(key) || data[key] == null || data[key].toString().length == 0) return { error: `Property ${key} required.`}        
     })
 
     if (!checkValidHour(data.hour)) return { error: `Invalid hour format.`}
@@ -103,11 +103,12 @@ async function apply(body) {
         return validPayload || {error: 'Unknow error'}
     }
 
+    let obj = null
     try {
-        await db.create('booking', body)
+        obj = await db.create('booking', body)
     }
     catch { return { status: false } }
-    return { status: true}
+    return { status: true, id:obj._id }
 }
 
 module.exports = { validate, findATable, hoursStatus, del, apply }

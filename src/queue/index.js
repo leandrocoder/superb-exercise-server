@@ -23,6 +23,7 @@ class Queue extends events {
 	}
 
 	add(payload) {
+
 		const params = {
 			MessageBody: JSON.stringify(payload),
 			QueueUrl: process.env.AWS_QUEUE_URL
@@ -31,7 +32,7 @@ class Queue extends events {
 			if (err) {
 				console.log("Error", err);
 			} else {
-				//console.log("Successfully added message", data.MessageId);
+				//console.log("Successfully added message", payload, data.MessageId);
 			}
 		})
 	}
@@ -51,7 +52,7 @@ class Queue extends events {
 		}
 	
 		this.sqs.receiveMessage(receiveConfig, (err, data) => {
-			if (!this.needDispose) return
+			if (this.needDispose) return
 			this.processMessages()
 			if (err) {
 				console.log(err, err.stack);

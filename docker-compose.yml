@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+    app:
+        build: .
+        ports:
+            - "3000:3000"
+        command: npm start
+
+    admin:
+        build: ../admin
+        ports:
+            - "8080:80"
+
+    site:
+        build: ../site
+        ports:
+            - "80:80"

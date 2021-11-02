@@ -76,7 +76,7 @@ describe('Booking', () => {
     it('Success requesting a booking with all correct data', async () => {
         await wait(500)
         const payload = {"name":"Leandro","phone":"+55 11988898193","date":"2100-06-08","hour":"14:00","chairs":1}
-        newBooking = (await booking.apply(payload))._id
+        newBooking = (await booking.apply(payload)).id
         expect(!!newBooking).toBe(true)
     })
 

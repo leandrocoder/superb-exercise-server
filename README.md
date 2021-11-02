@@ -12,7 +12,7 @@ technologies, like databases and testing.
 - [System Flow](#system-flow)
 - [REST API](#rest-api)
 - [Tests](#tests)
-- [Install](#install)
+- [Run and Install](#run-and-install)
 
 ## Objective
 
@@ -20,6 +20,9 @@ The objective is to implement a system to able users to send booking requests to
 
 ## Living project
 
+- [Server API](http://ec2-44-192-120-191.compute-1.amazonaws.com:3000)
+- [Client Booking Site](http://ec2-44-192-120-191.compute-1.amazonaws.com/)
+- [Restaurant owner system](http://ec2-44-192-120-191.compute-1.amazonaws.com:8080/)
 
 ## Frontend repositories
 
@@ -140,7 +143,7 @@ The basic system flow sends booking requests to a queue service, this could be u
 
 **Response**
 
-``` { "status": true } ```
+``` { "status": true, "id": {{ObjectId}} } ```
 
 ### Delete a Booking
 
@@ -252,6 +255,7 @@ Just for make tests easier.
 ## Tests
 
 The test running tool used to ensure all the endpoints in this project are running well is [Jest](https://jestjs.io/).
+To run the tests use the command ```npm test```
 
 - Database
     - [x] Connect
@@ -269,5 +273,41 @@ The test running tool used to ensure all the endpoints in this project are runni
     - [x] Delete booking
     - [x] Delete a table
 
-## Install
+## Run and Install
+
+To run the project, just install the dependencies using ```npm i``` and ```npm start```
+
+The project is full dockerized, to run it in a docker use the commands:
+
+```
+docker build -t exercise-server .
+docker run -d -p 3000:3000 exercise-server
+```
+
+Or just running the ```docker-compose.yml``` that will run all the tree projects (server, admin and site) with the command:
+```
+docker-compose up
+```
+
+### AWS Deploy
+
+The next commands consider the follow paths structure for the project repositories:
+
+<img src="./doc/folders.png">
+
+```
+@FOR /f "tokens=*" %i IN ('docker-machine env superbtest1') DO @%i
+```
+
+```
+cd ../admin
+call npm i 
+call npm run build
+cd ../site
+call npm i
+call npm run build
+cd ../server
+docker-compose build
+docker-compose up -d
+```
 
